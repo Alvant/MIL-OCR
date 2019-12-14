@@ -45,6 +45,7 @@ class TextExtractor:
         connection = BlockingConnection(ConnectionParameters(
             host='localhost'))
         channel = connection.channel()
+        channel.queue_declare(queue="corrector")
 
         with connection, channel:
             channel.basic_consume(

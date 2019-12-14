@@ -15,7 +15,6 @@ class Corrector:
         self.connection = BlockingConnection(ConnectionParameters(
             host="rabbit"))
         self.channel = self.connection.channel()
-        self.channel.queue_declare(queue="corrector", exclusive=True)
         print(" [*] Waiting for messages. To exit press CTRL+C")
 
         self.channel.basic_consume("corrector", self.callback)
