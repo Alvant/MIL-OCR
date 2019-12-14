@@ -9,7 +9,7 @@ from pika import ConnectionParameters, \
 
 
 class TextExtractor:
-    REPLY_QUERY = 'amq.rabbitmq.reply-to'
+    REPLY_QUERY = "amq.rabbitmq.reply-to"
     CORRECTOR_QUERY = "corrector"
 
     def __init__(self):
@@ -31,19 +31,25 @@ class TextExtractor:
         self.collection.insert_one(meta)
 
     def get_unhandled(self):
-        return self.collection.find({'recognizedText': None})
+        return self.collection.find({"recognizedText": None})
 
     def get_image(self, image_id):
         img = self.fs.get(image_id)
         return Image.open(BytesIO(img.read()))
 
+    def put_recognized_text(self, image_id):
+        pass
+
+    def put_corrected_text(self, image_id):
+        pass
+
     def reply_handler(self, ch, method_frame, properties, body):
-        print('RPC Client got reply: %s' % body)
-        print('RPC Client says bye')
+        print("RPC Client got reply: {:s}".format(body.decode()))
+        print("RPC Client says bye")
 
     def proccess_images(self):
         connection = BlockingConnection(ConnectionParameters(
-            host='localhost'))
+            host="localhost"))
         channel = connection.channel()
         channel.queue_declare(queue="corrector")
 
@@ -54,9 +60,9 @@ class TextExtractor:
                 auto_ack=True)
 
             for i in range(10):
-                channel.basic_publish(exchange='',
+                channel.basic_publish(exchange="",
                     routing_key=TextExtractor.CORRECTOR_QUERY,
-                    body='Hello Womld!  ' + str(i),
+                    body="Hello Womld!  " + str(i),
                     properties=BasicProperties(reply_to=TextExtractor.REPLY_QUERY))
 
                 print(" [x] Sent 'Hello World!'")

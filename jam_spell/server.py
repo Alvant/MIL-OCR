@@ -10,7 +10,7 @@ class Corrector:
     """
     def __init__(self):
         self.corrector = TSpellCorrector()
-        self.corrector.LoadLangModel('en.bin')
+        self.corrector.LoadLangModel("en.bin")
 
         self.connection = BlockingConnection(ConnectionParameters(
             host="rabbit"))
@@ -23,10 +23,10 @@ class Corrector:
         return self.corrector.FixFragment(text)
 
     def callback(self, ch, method, properties, body):
-        print(" [x] Received by correcter {}".format(body))
-        ch.basic_publish('',
+        print(" [x] Received by corrector {s}".format(body.decode()))
+        ch.basic_publish("",
             routing_key=properties.reply_to,
-            body=self.correct(str(body)))
+            body=self.correct(body.decode()))
         ch.basic_ack(delivery_tag=method.delivery_tag)
 
     def start(self):
