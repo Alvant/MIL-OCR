@@ -86,7 +86,7 @@ class TextExtractor:
             body=json.dumps(message),
             properties=BasicProperties(
                 reply_to=TextExtractor.CORRECTOR_REPLY_QUERY,
-                delivery_mode=2
+                delivery_mode=2 # persistent message
             ))
 
     def process_images(self):
