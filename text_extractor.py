@@ -2,9 +2,8 @@ import gridfs
 import json
 import base64
 
-from PIL import Image
+from time import time
 from pymongo import MongoClient
-from io import BytesIO
 from pika import ConnectionParameters, \
                  BlockingConnection, \
                  BasicProperties
@@ -24,8 +23,8 @@ class TextExtractor:
         self.fs = gridfs.GridFS(self.db)
         self.wait_for = None
 
-    def add_image(self, path: str) -> None:
-        with open("./img.png", "rb") as f:
+    def add_image(self, path: str):
+        with open(path, "rb") as f:
             img = f.read()
         image_idx = self.fs.put(img)
         meta = {
@@ -33,7 +32,6 @@ class TextExtractor:
             "recognizedText": None,
             "correctedText": None
         }
-
         self.collection.insert_one(meta)
 
     def get_unhandled(self):
@@ -59,7 +57,7 @@ class TextExtractor:
             }
         )
 
-    def reply_corrector_handler(self, ch, method_frame, properties, body):
+    def reply_corrector_handler(self, ch, method, properties, body):
         message = json.loads(body.decode())
         self.put_corrected_text(message["_id"], message["correctedText"])
         print("Received corrector reply: {:s}".format(message["_id"]))
@@ -67,17 +65,26 @@ class TextExtractor:
         if len(self.wait_for) == 0:
             ch.stop_consuming()
 
-    def reply_ocr_handler(self, ch, method_frame, properties, body):
+    def reply_ocr_handler(self, ch, method, properties, body):
         message = json.loads(body.decode())
+        if message["recognizedText"] is None:
+            self.wait_for.remove(ObjectId(message["_id"]))
+            if len(self.wait_for) == 0:
+                ch.stop_consuming()
+            return
+
         self.put_recognized_text(message["_id"], message["recognizedText"])
-        ch.basic_publish(exchange="",
+        print("Received ocr reply: {:s}".format(message["_id"]))
+        ch.basic_publish(
+            exchange="",
             routing_key=TextExtractor.CORRECTOR_QUERY,
             body=json.dumps(message),
             properties=BasicProperties(
-                reply_to=TextExtractor.CORRECTOR_REPLY_QUERY))
-        print("Received ocr reply: {:s}".format(message["_id"]))
+                reply_to=TextExtractor.CORRECTOR_REPLY_QUERY,
+                delivery_mode=2
+            ))
 
-    def proccess_images(self):
+    def process_images(self):
         connection = BlockingConnection(ConnectionParameters(
             host="localhost"))
 
@@ -101,13 +108,15 @@ class TextExtractor:
                 self.reply_ocr_handler,
                 auto_ack=True)
 
+            t = time()
             for item in self.get_unhandled():
                 image = self.get_image(item["imageID"])
                 message = {
                     "_id": str(item["_id"]),
                     "image": base64.encodebytes(image).decode('ascii')
                 }
-                channel.basic_publish(exchange="",
+                channel.basic_publish(
+                    exchange="",
                     routing_key=TextExtractor.OCR_QUERY,
                     body=json.dumps(message),
                     properties=BasicProperties(
@@ -118,11 +127,12 @@ class TextExtractor:
 
             if len(self.wait_for) > 0:
                 channel.start_consuming()
+            print("All images are recognized. Time: {:.2f}".format(time() - t))
 
 
 def main():
-    exctractor = TextExtractor()
-    exctractor.proccess_images()
+    extractor = TextExtractor()
+    extractor.process_images()
 
 
 if __name__ == "__main__":

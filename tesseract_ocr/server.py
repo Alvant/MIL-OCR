@@ -12,18 +12,29 @@ class Recognizer:
     """
     Class receives image and extract text.
     """
+
+    SUPPORTED_FORMATS = ["PNG", "JPEG"]
+
     def __init__(self):
         self.connection = BlockingConnection(ConnectionParameters(
             host="rabbit"))
         self.channel = self.connection.channel()
         self.channel.queue_declare(queue="ocr")
+        self.channel.basic_qos(prefetch_count=1)
+
         print(" [*] Waiting for messages. To exit press CTRL+C")
         self.channel.basic_consume("ocr", self.callback)
 
-    def recognize(self, img):
-        img = base64.decodebytes(img.encode('ascii'))
-        image = Image.open(BytesIO(img))
-        return image_to_string(image)
+    @staticmethod
+    def recognize(img):
+        try:
+            img = base64.decodebytes(img.encode('ascii'))
+            image = Image.open(BytesIO(img))
+            if image.format in Recognizer.SUPPORTED_FORMATS:
+                return image_to_string(image)
+            return None
+        except:
+            raise Exception("Can't open image. It's really image?")
 
     def callback(self, ch, method, properties, body):
         message = json.loads(body.decode())
@@ -32,7 +43,8 @@ class Recognizer:
             "recognizedText": self.recognize(message["image"])
         }
         print(" [x] Received image {} by ocr.".format(message["_id"]))
-        ch.basic_publish("",
+        ch.basic_publish(
+            "",
             routing_key=properties.reply_to,
             body=json.dumps(reply_message))
         ch.basic_ack(delivery_tag=method.delivery_tag)
@@ -42,7 +54,7 @@ class Recognizer:
             self.channel.start_consuming()
         except KeyboardInterrupt:
             self.channel.stop_consuming()
-        except Exception:
+        except Exception as e:
             self.channel.stop_consuming()
             print("Error!!!\n", traceback.format_exc())
 

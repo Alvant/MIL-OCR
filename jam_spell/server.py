@@ -17,6 +17,7 @@ class Corrector:
             host="rabbit"))
         self.channel = self.connection.channel()
         self.channel.queue_declare(queue="corrector")
+        self.channel.basic_qos(prefetch_count=1)
         print(" [*] Waiting for messages. To exit press CTRL+C")
         self.channel.basic_consume("corrector", self.callback)
 
@@ -30,7 +31,8 @@ class Corrector:
             "correctedText": self.correct(message["recognizedText"])
         }
         print(" [x] Received by corrector {}".format(message["_id"]))
-        ch.basic_publish("",
+        ch.basic_publish(
+            "",
             routing_key=properties.reply_to,
             body=json.dumps(reply_message))
         ch.basic_ack(delivery_tag=method.delivery_tag)
