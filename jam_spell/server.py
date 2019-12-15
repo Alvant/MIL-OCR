@@ -1,4 +1,5 @@
 import traceback
+import json
 
 from jamspell import TSpellCorrector
 from pika import BlockingConnection, ConnectionParameters
@@ -15,18 +16,19 @@ class Corrector:
         self.connection = BlockingConnection(ConnectionParameters(
             host="rabbit"))
         self.channel = self.connection.channel()
+        self.channel.queue_declare(queue="corrector")
         print(" [*] Waiting for messages. To exit press CTRL+C")
-
         self.channel.basic_consume("corrector", self.callback)
 
     def correct(self, text: str):
         return self.corrector.FixFragment(text)
 
     def callback(self, ch, method, properties, body):
-        print(" [x] Received by corrector {s}".format(body.decode()))
+        message = json.loads(body.decode())
+        print(" [x] Received by corrector {s}".format(message["_id"]))
         ch.basic_publish("",
             routing_key=properties.reply_to,
-            body=self.correct(body.decode()))
+            body=self.correct(message["recognizedText"]))
         ch.basic_ack(delivery_tag=method.delivery_tag)
 
     def start(self):
