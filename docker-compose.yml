@@ -47,6 +47,8 @@ services:
       - ocrapp
     restart: always
     container_name: db
+    volumes:
+      - ./mongo-volume:/data/db
 
 
 
