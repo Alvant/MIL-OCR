@@ -28,10 +28,10 @@ class Recognizer:
     def callback(self, ch, method, properties, body):
         message = json.loads(body.decode())
         reply_message = {
-            "imageID": message["imageID"],
+            "_id": message["_id"],
             "recognizedText": self.recognize(message["image"])
         }
-        print(" [x] Received image {} by ocr.".format(message["imageID"]))
+        print(" [x] Received image {} by ocr.".format(message["_id"]))
         ch.basic_publish("",
             routing_key=properties.reply_to,
             body=json.dumps(reply_message))

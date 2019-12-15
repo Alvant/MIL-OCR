@@ -26,10 +26,10 @@ class Corrector:
     def callback(self, ch, method, properties, body):
         message = json.loads(body.decode())
         reply_message = {
-            "imageID": message["imageID"],
+            "_id": message["_id"],
             "correctedText": self.correct(message["recognizedText"])
         }
-        print(" [x] Received by corrector {}".format(message["imageID"]))
+        print(" [x] Received by corrector {}".format(message["_id"]))
         ch.basic_publish("",
             routing_key=properties.reply_to,
             body=json.dumps(reply_message))
