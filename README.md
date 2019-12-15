@@ -14,7 +14,7 @@ docker-compose pull
 
 ## Usage
 The program processes all images from databyse.  
-Start docker containers with workers and db:
+Start docker containers with workers, queue and db:
 ```
 docker-compose up
 ```
