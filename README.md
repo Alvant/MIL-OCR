@@ -49,3 +49,12 @@ docker-compose scale jamspell=3
 ```
 
 *3 is an example.*
+
+### Results
+Time to process dataset of 411 images:
+
+| n ocr | n corrector | time, s | memory, mb |
+|-------|-------------|---------|-----------:|
+|  1    |     1       |    65.3 |            |
+|  2    |     2       |    36.5 |            |
+
