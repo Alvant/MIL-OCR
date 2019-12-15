@@ -11,7 +11,7 @@ ENV VIRTUAL_ENV=/opt/venv
 RUN python3 -m virtualenv --python=/usr/bin/python3 $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-RUN pip install pika
+RUN pip install pika pytesseract
 
 ADD . /home/app
 WORKDIR /home/app
