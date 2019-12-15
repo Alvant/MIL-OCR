@@ -8,11 +8,12 @@ from io import BytesIO
 from pika import ConnectionParameters, \
                  BlockingConnection, \
                  BasicProperties
+from bson import ObjectId
 
 
 class TextExtractor:
-    REPLY_QUERY = "amq.rabbitmq.reply-to"
     CORRECTOR_QUERY = "corrector"
+    CORRECTOR_REPLY_QUERY = "corrector_reply"
     OCR_QUERY = "ocr"
     OCR_REPLY_QUERY = "ocr_reply"
 
@@ -43,38 +44,54 @@ class TextExtractor:
 
     def put_recognized_text(self, image_id, recognized_text):
         self.collection.update_one(
-            {"imageID": image_id},
+            {"imageID": ObjectId(image_id)},
             {
-                "set": {"recognizedText": recognized_text}
+                "$set": {"recognizedText": recognized_text}
             }
         )
 
     def put_corrected_text(self, image_id, recognized_text):
         self.collection.update_one(
-            {"imageID": image_id},
+            {"imageID": ObjectId(image_id)},
             {
-                "set": {"correctedText": recognized_text}
+                "$set": {"correctedText": recognized_text}
             }
         )
 
-    def reply_handler(self, ch, method_frame, properties, body):
-        print("Worker reply from correcter: {:s}".format(body.decode()))
+    def reply_corrector_handler(self, ch, method_frame, properties, body):
+        message = json.loads(body.decode())
+        self.put_corrected_text(message["imageID"], message["correctedText"])
+        print("Received corrector reply: {:s}".format(message["imageID"]))
 
     def reply_ocr_handler(self, ch, method_frame, properties, body):
-        print("Worker reply from ocr: {:s}".format(body.decode()))
+        message = json.loads(body.decode())
+        self.put_recognized_text(message["imageID"], message["recognizedText"])
+        ch.basic_publish(exchange="",
+            routing_key=TextExtractor.CORRECTOR_QUERY,
+            body=json.dumps(message),
+            properties=BasicProperties(
+                reply_to=TextExtractor.CORRECTOR_REPLY_QUERY))
+        print("Received ocr reply: {:s}".format(message["imageID"]))
 
     def proccess_images(self):
         connection = BlockingConnection(ConnectionParameters(
             host="localhost"))
+
         channel = connection.channel()
-        channel.queue_declare(queue=TextExtractor.OCR_REPLY_QUERY)
+        channel.queue_declare(
+            queue=TextExtractor.OCR_REPLY_QUERY,
+            auto_delete=True)
+        channel.queue_declare(
+            queue=TextExtractor.CORRECTOR_REPLY_QUERY,
+            auto_delete=True)
+
         item = self.get_unhandled()[0]
         image = self.get_image(item["imageID"])
 
         with connection, channel:
             channel.basic_consume(
-                TextExtractor.REPLY_QUERY,
-                self.reply_handler,
+                TextExtractor.CORRECTOR_REPLY_QUERY,
+                self.reply_corrector_handler,
                 auto_ack=True)
 
             channel.basic_consume(
@@ -83,11 +100,15 @@ class TextExtractor:
                 auto_ack=True)
 
             for _ in range(1):
-                message = {"_id": str(item["_id"]), "image": base64.encodebytes(image).decode('ascii')}
+                message = {
+                    "imageID": str(item["imageID"]),
+                    "image": base64.encodebytes(image).decode('ascii')
+                }
                 channel.basic_publish(exchange="",
                     routing_key=TextExtractor.OCR_QUERY,
                     body=json.dumps(message),
-                    properties=BasicProperties(reply_to=TextExtractor.REPLY_QUERY))
+                    properties=BasicProperties(
+                        reply_to=TextExtractor.OCR_REPLY_QUERY))
 
                 print(" [x] Sent to image ocr")
 
