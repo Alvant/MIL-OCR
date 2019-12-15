@@ -32,9 +32,10 @@ class Recognizer:
             image = Image.open(BytesIO(img))
             if image.format in Recognizer.SUPPORTED_FORMATS:
                 return image_to_string(image)
-            return None
         except:
-            raise Exception("Can't open image. It's really image?")
+            print("Can't open image. It's really image?")
+        
+        return None
 
     def callback(self, ch, method, properties, body):
         message = json.loads(body.decode())
