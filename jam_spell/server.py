@@ -5,11 +5,15 @@ from jamspell import TSpellCorrector
 from pika import BlockingConnection, ConnectionParameters
 
 
+from time import sleep
+
 class Corrector:
     """
     Class receives messages and correct their text.
     """
     def __init__(self):
+        sleep(20)
+
         self.corrector = TSpellCorrector()
         self.corrector.LoadLangModel("en.bin")
 

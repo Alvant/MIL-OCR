@@ -1,0 +1,39 @@
+version: "3"
+
+networks:
+  ocrapp:   
+    # external:
+    #   name: ocrapp
+
+services:
+  jamspell:
+    build: './jam_spell'
+    networks:
+      - ocrapp
+    restart: on-failure
+    depends_on:
+      - rabbit
+    command: python server.py
+
+  tesseractocr:
+    build: './tesseract_ocr'
+    networks:
+      - ocrapp
+    restart: on-failure
+    depends_on:
+      - rabbit
+    command: python server.py
+    
+  rabbit:
+    image: rabbitmq:3-management
+    ports:
+      - 5672:5672
+      - 15672:15672 
+    networks:
+      - ocrapp
+    container_name: rabbit
+
+
+
+
+

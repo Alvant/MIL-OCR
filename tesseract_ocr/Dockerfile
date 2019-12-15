@@ -4,6 +4,7 @@ RUN apt-get update \
     python3 \
     python3-pip \
     python3-virtualenv \
+    curl \
     && apt-get clean \
     && apt-get autoremove
 
@@ -15,5 +16,3 @@ RUN pip install pika pytesseract
 
 ADD . /home/app
 WORKDIR /home/app
-
-CMD ["python server.py"]

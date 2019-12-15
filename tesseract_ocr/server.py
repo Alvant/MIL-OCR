@@ -7,12 +7,15 @@ from PIL import Image
 from pytesseract import image_to_string
 from pika import BlockingConnection, ConnectionParameters
 
+from time import sleep
+
 
 class Recognizer:
     """
     Class receives image and extract text.
     """
     def __init__(self):
+        sleep(20)
         self.connection = BlockingConnection(ConnectionParameters(
             host="rabbit"))
         self.channel = self.connection.channel()

@@ -13,6 +13,7 @@ RUN apt-get install -y \
     python3-dev \
     g++-5 \
     gcc-5 \
+    curl \
     && apt-get clean \
     && apt-get autoremove
 
