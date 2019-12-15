@@ -69,22 +69,28 @@ Time to process dataset of 411 images:
 [Dataset description](https://rrc.cvc.uab.es/?ch=1). 
 [Download](https://rrc.cvc.uab.es/downloads/Challenge1_Training_Task12_Images.zip). 
 
+#### In:
 ![](report_images/img_7.png) 
+#### Out: 
 The special one-day
 Apple shopping
 Ya
 
 This Friday.
 
-1. 
-![](report_images/img_7.png) 
+#### In:
+![](report_images/img_66.png) 
+
+#### Out: 
 Ss
 
 Meaningful
 Moments
 
-1.
-![](report_images/img.png) 
+#### In:
+![](report_images/img.png)    
+
+#### Out: 
 With the sorrow of living so great, the sorrow of punishment had to be pit-
 less. We lived for the day and died for it. When there was reason and desire to
 punish we wrote our lesson with gun or whip immediately in the sullen flesh
