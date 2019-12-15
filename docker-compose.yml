@@ -6,6 +6,7 @@ networks:
 services:
   jamspell:
     build: './jam_spell'
+    image: morgachev/jamspell
     networks:
       - ocrapp
     depends_on:
@@ -18,6 +19,7 @@ services:
 
   tesseractocr:
     build: './tesseract_ocr'
+    image: morgachev/tessetact
     networks:
       - ocrapp
     depends_on:
@@ -36,7 +38,16 @@ services:
     networks:
       - ocrapp
     container_name: rabbit
-  
+
+  mongo:
+    image: mongo
+    ports: 
+      - 27017:27017
+    networks:
+      - ocrapp
+    restart: always
+    container_name: db
+
 
 
 
