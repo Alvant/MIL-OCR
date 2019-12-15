@@ -31,6 +31,11 @@ To process all unhandled images:
 python text_extractor.py process
 ```
 
+To clear database:
+```
+python text_extractor.py clear
+```
+
 ## Scale test
 
 You can change the number of workers for ocr and corrector with command:
@@ -43,4 +48,4 @@ And
 docker-compose scale jamspell=3
 ```
 
-*3 is an example*
+*3 is an example.*
