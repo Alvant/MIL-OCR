@@ -1,8 +1,10 @@
+import argparse
 import gridfs
 import json
 import base64
 
 from time import time
+from os import listdir, path
 from pymongo import MongoClient
 from pika import ConnectionParameters, \
                  BlockingConnection, \
@@ -16,6 +18,7 @@ class TextExtractor:
     CORRECTOR_REPLY_QUERY = "corrector_reply"
     OCR_QUERY = "ocr"
     OCR_REPLY_QUERY = "ocr_reply"
+    DATA_PATH = "data"
 
     def __init__(self):
         self.client = MongoClient("localhost", 27017)
@@ -134,8 +137,31 @@ class TextExtractor:
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    subparser = parser.add_subparsers(dest='cmd')
+    subparser.add_parser(
+        "load", 
+        help="load images from ./data to db")
+    subparser.add_parser(
+        "process",
+        help="recognize text from images in db")
+    subparser.add_parser(
+        "clear",
+        help="clear db")
+    args = parser.parse_args()
     extractor = TextExtractor()
-    extractor.process_images()
+
+    if args.cmd == "load":
+        for name in listdir(TextExtractor.DATA_PATH):
+            if name == '.DS_Store':
+                continue
+            extractor.add_image(path.join(TextExtractor.DATA_PATH, name))
+    elif args.cmd == "process":
+        extractor.process_images()
+    elif args.cmd == "clear":
+        extractor.collection.delete_many({})
+        for item in extractor.fs.find({}):
+            extractor.fs.delete(item._id)
 
 
 if __name__ == "__main__":
