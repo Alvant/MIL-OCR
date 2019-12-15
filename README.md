@@ -8,7 +8,7 @@ Text recognizer is based on [tesseract](https://github.com/tesseract-ocr/tessera
 To install you must have `docker` on your computer.  
 
 ```
-pip install -r requirments.txt
+pip install -r requirements.txt
 docker-compose run
 ```
 
