@@ -53,8 +53,14 @@ docker-compose scale jamspell=3
 ### Results
 Time to process dataset of 411 images:
 
-| n ocr | n corrector | time, s | memory, mb |
-|-------|-------------|---------|-----------:|
-|  1    |     1       |    65.3 |            |
-|  2    |     2       |    36.5 |            |
+| n ocr | n corrector | time, s |
+|-------|-------------|--------:|
+|  1    |     1       |    65.3 |
+|  2    |     2       |    36.5 |
+
+#### Single workers resource usage
+![](report_images/single_workers.png)
+
+#### Multiply workers resource usage
+![](report_images/multiply_workers.png) 
 
