@@ -9,7 +9,7 @@ To install you must have `docker` on your computer.
 
 ```
 pip install -r requirements.txt
-docker-compose up
+docker-compose pull
 ```
 
 ## Usage
