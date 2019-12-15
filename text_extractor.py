@@ -8,6 +8,7 @@ from pika import ConnectionParameters, \
                  BlockingConnection, \
                  BasicProperties
 from bson import ObjectId
+from tqdm import tqdm
 
 
 class TextExtractor:
@@ -22,6 +23,7 @@ class TextExtractor:
         self.collection = self.db["image_collection"]
         self.fs = gridfs.GridFS(self.db)
         self.wait_for = None
+        self.progress = None
 
     def add_image(self, path: str):
         with open(path, "rb") as f:
@@ -60,8 +62,8 @@ class TextExtractor:
     def reply_corrector_handler(self, ch, method, properties, body):
         message = json.loads(body.decode())
         self.put_corrected_text(message["_id"], message["correctedText"])
-        print("Received corrector reply: {:s}".format(message["_id"]))
         self.wait_for.remove(ObjectId(message["_id"]))
+        self.progress.update()
         if len(self.wait_for) == 0:
             ch.stop_consuming()
 
@@ -69,12 +71,12 @@ class TextExtractor:
         message = json.loads(body.decode())
         if message["recognizedText"] is None:
             self.wait_for.remove(ObjectId(message["_id"]))
+            self.progress.update()
             if len(self.wait_for) == 0:
                 ch.stop_consuming()
             return
 
         self.put_recognized_text(message["_id"], message["recognizedText"])
-        print("Received ocr reply: {:s}".format(message["_id"]))
         ch.basic_publish(
             exchange="",
             routing_key=TextExtractor.CORRECTOR_QUERY,
@@ -122,11 +124,12 @@ class TextExtractor:
                     properties=BasicProperties(
                         reply_to=TextExtractor.OCR_REPLY_QUERY))
 
-                print(" [x] Sent to image ocr")
                 self.wait_for.add(item["_id"])
 
             if len(self.wait_for) > 0:
+                self.progress = tqdm(total=len(self.wait_for))
                 channel.start_consuming()
+                self.progress.close()
             print("All images are recognized. Time: {:.2f}".format(time() - t))
 
 
