@@ -116,7 +116,8 @@ class TextExtractor:
                 print(" [x] Sent to image ocr")
                 self.wait_for.add(item["_id"])
 
-            channel.start_consuming()
+            if len(self.wait_for) > 0:
+                channel.start_consuming()
 
 
 def main():

@@ -1,28 +1,32 @@
-version: "3"
+version: "3.7"
 
 networks:
   ocrapp:   
-    # external:
-    #   name: ocrapp
 
 services:
   jamspell:
     build: './jam_spell'
     networks:
       - ocrapp
-    restart: on-failure
     depends_on:
       - rabbit
-    command: python server.py
+    command: bash -c "
+      /wait 
+      && python server.py"
+    environment:
+      WAIT_HOSTS: rabbit:5672
 
   tesseractocr:
     build: './tesseract_ocr'
     networks:
       - ocrapp
-    restart: on-failure
     depends_on:
       - rabbit
-    command: python server.py
+    command: bash -c "
+      /wait 
+      && python server.py"
+    environment:
+      WAIT_HOSTS: rabbit:5672
     
   rabbit:
     image: rabbitmq:3-management
@@ -32,7 +36,7 @@ services:
     networks:
       - ocrapp
     container_name: rabbit
-
+  
 
 
 
