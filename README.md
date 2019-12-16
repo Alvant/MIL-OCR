@@ -59,10 +59,10 @@ Time to process dataset of 411 images:
 |  2    |     2       |    36.5 |
 
 #### Single workers resource usage
-![](report_images/single_workers.png)
+![](report_images/single_workers.jpg)
 
 #### Multiply workers resource usage
-![](report_images/multiply_workers.png) 
+![](report_images/multiply_workers.jpg) 
 
 
 ## Examples
