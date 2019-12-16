@@ -48,9 +48,7 @@ services:
     restart: always
     container_name: db
     volumes:
-      - ./mongo-volume:/data/db
+      - mongo-volume:/data/db
 
-
-
-
-
+volumes:
+  mongo-volume:
