@@ -14,15 +14,15 @@ docker-compose pull
 
 ## Usage
 
-In [config file](config.json) one can define which language is going to be recognized on the images using the parameter `"tesseract-language"`.
-If the desired language is not English or Russian, then one should also modify the [Dockerfile](./tesseract/Dockerfile) and rebuild the service.
+In [config file](tesseract/config.json) one can define which language is going to be recognized on the images using the parameter `"language"`.
+If the desired language is not English or Russian, then one should also modify the [Dockerfile](tesseract/Dockerfile) and rebuild the service.
 Languages are mostly defined by three letter language codes, which are accepted by [tesseract](https://github.com/tesseract-ocr/tesseract).
 Seems it is not so easy to find the list of languages on the tesseract's site, so here is another [help link](https://askubuntu.com/questions/793634/how-do-i-install-a-new-language-pack-for-tesseract-on-16-04) with somebody's question on askubuntu.com.
 Default language is English.
 
 Text corrector [JamSpell](https://github.com/bakwc/JamSpell) needs trained language models.
 Some of them may be [downloaded](https://github.com/bakwc/JamSpell#download-models), there is also an option to [train](https://github.com/bakwc/JamSpell#train) a model on some text collection.
-As soon as the model is ready, one should put the absolute path to it (eg. */home/user/en.bin*) in the [config file](config.json)!
+As soon as the model is ready, one should put the absolute path to it (eg. */home/user/en.bin*) in the [config file](jamspell/config.json)!
 
 The program processes all images from databyse.  
 Start docker containers with workers, queue and db:

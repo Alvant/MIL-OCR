@@ -59,12 +59,11 @@ class Corrector:
 def main():
     config_file_path = os.path.join(
         os.path.dirname(os.path.abspath(__file__)),
-        '..',
         'config.json'
     )
     config = json.loads(open(config_file_path, 'r').read())
 
-    corrector = Corrector(config["jamspell-model-path"])
+    corrector = Corrector(config["model-path"])
 
     corrector.start()
 
