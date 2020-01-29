@@ -17,7 +17,7 @@ services:
     environment:
       WAIT_HOSTS: rabbit:5672
 
-  tesseractocr:
+  tesseract:
     build: './tesseract'
     image: morgachev/tessetact
     networks:

@@ -3,7 +3,7 @@
 This is the program to recognize text from image.
 Text recognizer is based on [tesseract](https://github.com/tesseract-ocr/tesseract) ocr and [jamspell](https://github.com/bakwc/JamSpell) corrector.  
 
-## Install
+## Installation
 
 To install you must have `docker` on your computer.  
 
@@ -13,6 +13,13 @@ docker-compose pull
 ```
 
 ## Usage
+
+In [config file](config.json) one can define which language is going to be recognized on the images using the parameter `"tesseract-language"`.
+If the desired language is not English or Russian, then one should also modify the [Dockerfile](./tesseract/Dockerfile) and rebuild the service.
+Languages are mostly defined by three letter language codes, which are accepted by [tesseract](https://github.com/tesseract-ocr/tesseract).
+Seems it is not so easy to find the list of languages on the tesseract's site, so here is another [help link](https://askubuntu.com/questions/793634/how-do-i-install-a-new-language-pack-for-tesseract-on-16-04) with somebody's question on askubuntu.com.
+Default language is English.
+
 The program processes all images from databyse.  
 Start docker containers with workers, queue and db:
 ```
@@ -36,7 +43,7 @@ To clear database:
 python text_extractor.py clear
 ```
 
-## Scale test
+## Scaling Test
 
 You can change the number of workers for ocr and corrector with command:
 ```
@@ -51,6 +58,7 @@ docker-compose scale jamspell=3
 *3 is an example.*
 
 ### Results
+
 Time to process dataset of 411 images:
 
 | n ocr | n corrector | time, s |
@@ -59,19 +67,25 @@ Time to process dataset of 411 images:
 |  2    |     2       |    36.5 |
 
 #### Single workers resource usage
+
 ![](report_images/single_workers.jpg)
 
 #### Multiply workers resource usage
+
 ![](report_images/multiply_workers.jpg) 
 
 
 ## Examples
+
 [Dataset description](https://rrc.cvc.uab.es/?ch=1). 
 [Download](https://rrc.cvc.uab.es/downloads/Challenge1_Training_Task12_Images.zip). 
 
 #### In:
+
 ![](report_images/img_7.png) 
+
 #### Out: 
+
 The special one-day
 Apple shopping
 Ya
@@ -79,6 +93,7 @@ Ya
 This Friday.
 
 #### In:
+
 ![](report_images/img_66.png) 
 
 #### Out: 
@@ -88,9 +103,11 @@ Meaningful
 Moments
 
 #### In:
+
 ![](report_images/img.png)    
 
-#### Out: 
+#### Out:
+
 With the sorrow of living so great, the sorrow of punishment had to be pit-
 less. We lived for the day and died for it. When there was reason and desire to
 punish we wrote our lesson with gun or whip immediately in the sullen flesh
@@ -113,3 +130,11 @@ and their talents in serving another race.
 Ly
 
 (I.E. Lawrence, Seven Pillars of Wisdom)
+
+
+## Appendix. Containers
+
+If one need to rebuild some service defined in [docker-compose.yml](docker-compose.yml) (eg. after changing something in the source code to make the changes actually work), she may use this command
+```
+docker-compose build --no-cache <service_name>
+```

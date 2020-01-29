@@ -1,6 +1,7 @@
-import traceback
-import json
 import base64
+import json
+import os
+import traceback
 
 from io import BytesIO
 from PIL import Image
@@ -15,23 +16,25 @@ class Recognizer:
 
     SUPPORTED_FORMATS = ["PNG", "JPEG"]
 
-    def __init__(self):
-        self.connection = BlockingConnection(ConnectionParameters(
-            host="rabbit"))
+    def __init__(self, language: str):
+        self.connection = BlockingConnection(
+            ConnectionParameters(host="rabbit")
+        )
         self.channel = self.connection.channel()
         self.channel.queue_declare(queue="ocr")
         self.channel.basic_qos(prefetch_count=1)
+        self.language = language
 
         print(" [*] Waiting for messages. To exit press CTRL+C")
+
         self.channel.basic_consume("ocr", self.callback)
 
-    @staticmethod
-    def recognize(img):
+    def recognize(self, img):
         try:
             img = base64.decodebytes(img.encode('ascii'))
             image = Image.open(BytesIO(img))
             if image.format in Recognizer.SUPPORTED_FORMATS:
-                return image_to_string(image)
+                return image_to_string(image, lang=self.language)
         except:
             print("Can't open image. It's really image?")
         
@@ -61,7 +64,17 @@ class Recognizer:
 
 
 def main():
-    recognizer = Recognizer()
+    config_file_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        '..',
+        'config.json'
+    )
+    config = json.loads(open(config_file_path, 'r').read())
+
+    recognizer = Recognizer(
+        config['tesseract-language']
+    )
+
     recognizer.start()
 
 
