@@ -1,4 +1,4 @@
-# MIL.testproject
+# MIL-OCR
 
 This is the program to recognize text from image.
 Text recognizer is based on [tesseract](https://github.com/tesseract-ocr/tesseract) ocr and [jamspell](https://github.com/bakwc/JamSpell) corrector.  

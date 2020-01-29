@@ -5,7 +5,7 @@ networks:
 
 services:
   jamspell:
-    build: './jam_spell'
+    build: './jamspell'
     image: morgachev/jamspell
     networks:
       - ocrapp
@@ -18,7 +18,7 @@ services:
       WAIT_HOSTS: rabbit:5672
 
   tesseractocr:
-    build: './tesseract_ocr'
+    build: './tesseract'
     image: morgachev/tessetact
     networks:
       - ocrapp
