@@ -1,5 +1,7 @@
-import traceback
 import json
+import os
+import traceback
+import warnings
 
 from jamspell import TSpellCorrector
 from pika import BlockingConnection, ConnectionParameters
@@ -9,9 +11,16 @@ class Corrector:
     """
     Class receives messages and correct their text.
     """
-    def __init__(self):
+    def __init__(self, model_path: str):
         self.corrector = TSpellCorrector()
-        self.corrector.LoadLangModel("en.bin")
+
+        is_model_loaded = self.corrector.LoadLangModel(model_path)
+
+        if is_model_loaded is False:
+            warnings.warn(
+                f"Failed to load the model \"{model_path}\"!"
+                " JamSpell is going to be useless without a model..."
+            )
 
         self.connection = BlockingConnection(ConnectionParameters(
             host="rabbit"))
@@ -48,7 +57,15 @@ class Corrector:
 
 
 def main():
-    corrector = Corrector()
+    config_file_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        '..',
+        'config.json'
+    )
+    config = json.loads(open(config_file_path, 'r').read())
+
+    corrector = Corrector(config["jamspell-model-path"])
+
     corrector.start()
 
 

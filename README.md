@@ -20,6 +20,10 @@ Languages are mostly defined by three letter language codes, which are accepted 
 Seems it is not so easy to find the list of languages on the tesseract's site, so here is another [help link](https://askubuntu.com/questions/793634/how-do-i-install-a-new-language-pack-for-tesseract-on-16-04) with somebody's question on askubuntu.com.
 Default language is English.
 
+Text corrector [JamSpell](https://github.com/bakwc/JamSpell) needs trained language models.
+Some of them may be [downloaded](https://github.com/bakwc/JamSpell#download-models), there is also an option to [train](https://github.com/bakwc/JamSpell#train) a model on some text collection.
+As soon as the model is ready, one should put the absolute path to it (eg. */home/user/en.bin*) in the [config file](config.json)!
+
 The program processes all images from databyse.  
 Start docker containers with workers, queue and db:
 ```
@@ -134,7 +138,7 @@ Ly
 
 ## Appendix. Containers
 
-If one need to rebuild some service defined in [docker-compose.yml](docker-compose.yml) (eg. after changing something in the source code to make the changes actually work), she may use this command
+If one needs to rebuild some service defined in [docker-compose.yml](docker-compose.yml) (eg. after changing something in the source code to make the changes actually work), she may use this command
 ```
 docker-compose build --no-cache <service_name>
 ```
