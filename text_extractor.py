@@ -156,8 +156,7 @@ def main():
     args = parser.parse_args()
 
     config_file_path = os.path.join(
-        os.path.abspath(__file__),
-        '..',
+        os.path.dirname(os.path.abspath(__file__)),
         'config.json'
     )
     config = json.loads(open(config_file_path, 'r').read())

@@ -65,7 +65,7 @@ class Recognizer:
 
 def main():
     config_file_path = os.path.join(
-        os.path.abspath(__file__),
+        os.path.dirname(os.path.abspath(__file__)),
         '..',
         'config.json'
     )
