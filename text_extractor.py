@@ -1,7 +1,8 @@
 import argparse
+import base64
 import gridfs
 import json
-import base64
+import os
 
 from time import time
 from os import listdir, path
@@ -20,13 +21,15 @@ class TextExtractor:
     OCR_REPLY_QUERY = "ocr_reply"
     DATA_PATH = "data"
 
-    def __init__(self):
+    def __init__(self, encoding):
         self.client = MongoClient("localhost", 27017)
         self.db = self.client["image_db"]
         self.collection = self.db["image_collection"]
         self.fs = gridfs.GridFS(self.db)
         self.wait_for = None
         self.progress = None
+
+        self.encoding = encoding
 
     def add_image(self, path: str):
         with open(path, "rb") as f:
@@ -44,6 +47,7 @@ class TextExtractor:
 
     def get_image(self, image_idx):
         img = self.fs.get(image_idx)
+
         return img.read()
 
     def put_recognized_text(self, idx, recognized_text):
@@ -118,7 +122,7 @@ class TextExtractor:
                 image = self.get_image(item["imageID"])
                 message = {
                     "_id": str(item["_id"]),
-                    "image": base64.encodebytes(image).decode('ascii')
+                    "image": base64.encodebytes(image).decode(self.encoding)
                 }
                 channel.basic_publish(
                     exchange="",
@@ -148,18 +152,32 @@ def main():
     subparser.add_parser(
         "clear",
         help="clear db")
+
     args = parser.parse_args()
-    extractor = TextExtractor()
+
+    config_file_path = os.path.join(
+        os.path.abspath(__file__),
+        '..',
+        'config.json'
+    )
+    config = json.loads(open(config_file_path, 'r').read())
+
+    extractor = TextExtractor(
+        config['image-bytes-encoding']
+    )
 
     if args.cmd == "load":
         for name in listdir(TextExtractor.DATA_PATH):
             if name == '.DS_Store':
                 continue
             extractor.add_image(path.join(TextExtractor.DATA_PATH, name))
+
     elif args.cmd == "process":
         extractor.process_images()
+
     elif args.cmd == "clear":
         extractor.collection.delete_many({})
+
         for item in extractor.fs.find({}):
             extractor.fs.delete(item._id)
 
