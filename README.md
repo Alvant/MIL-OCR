@@ -131,3 +131,9 @@ Ly
 (I.E. Lawrence, Seven Pillars of Wisdom)
 
 
+## Appendix. Containers
+
+If one need to rebuild some service defined in [docker-compose.yml](docker-compose.yml) (eg. after changing something in the source code to make the changes actually work), she may use this command
+```
+docker-compose build --no-cache <service_name>
+```
