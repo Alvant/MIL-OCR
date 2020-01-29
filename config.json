@@ -1,4 +1,5 @@
 {
   "image-bytes-encoding": "ascii",
-  "tesseract-language": "eng"
+  "tesseract-language": "eng",
+  "jamspell-model-path": null
 }
