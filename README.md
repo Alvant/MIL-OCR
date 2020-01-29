@@ -15,7 +15,7 @@ docker-compose pull
 ## Usage
 
 In [config file](config.json) one can define which language is going to be recognized on the images using the parameter `"tesseract-language"`.
-If the desired language is not English and Russian, then one should also modify the [Docker file](./tesseract/Dockerfile) and rebuild the service.
+If the desired language is not English or Russian, then one should also modify the [Dockerfile](./tesseract/Dockerfile) and rebuild the service.
 Languages are mostly defined by three letter language codes, which are accepted by [tesseract](https://github.com/tesseract-ocr/tesseract).
 Seems it is not so easy to find the list of languages on the tesseract's site, so here is another [help link](https://askubuntu.com/questions/793634/how-do-i-install-a-new-language-pack-for-tesseract-on-16-04) with somebody's question on askubuntu.com.
 Default language is English.
