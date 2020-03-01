@@ -16,14 +16,16 @@ class Recognizer:
 
     SUPPORTED_FORMATS = ["PNG", "JPEG"]
 
-    def __init__(self, language: str):
+    def __init__(self, language: str, encoding: str):
         self.connection = BlockingConnection(
             ConnectionParameters(host="rabbit")
         )
         self.channel = self.connection.channel()
         self.channel.queue_declare(queue="ocr")
         self.channel.basic_qos(prefetch_count=1)
+
         self.language = language
+        self.encoding = encoding
 
         print(" [*] Waiting for messages. To exit press CTRL+C")
 
@@ -31,7 +33,7 @@ class Recognizer:
 
     def recognize(self, img):
         try:
-            img = base64.decodebytes(img.encode('ascii'))
+            img = base64.decodebytes(img.encode(self.encoding))
             image = Image.open(BytesIO(img))
             if image.format in Recognizer.SUPPORTED_FORMATS:
                 return image_to_string(image, lang=self.language)
@@ -66,13 +68,13 @@ class Recognizer:
 def main():
     config_file_path = os.path.join(
         os.path.dirname(os.path.abspath(__file__)),
-        '..',
         'config.json'
     )
     config = json.loads(open(config_file_path, 'r').read())
 
     recognizer = Recognizer(
-        config['tesseract-language']
+        config['language'],
+        config['image-bytes-encoding']
     )
 
     recognizer.start()
