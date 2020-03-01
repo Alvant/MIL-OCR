@@ -12,6 +12,10 @@ from pika import ConnectionParameters, \
                  BasicProperties
 from bson import ObjectId
 from tqdm import tqdm
+from typing import List
+
+
+_MODULE_PATH = os.path.dirname(os.path.abspath(__file__))
 
 
 class TextExtractor:
@@ -19,7 +23,7 @@ class TextExtractor:
     CORRECTOR_REPLY_QUERY = "corrector_reply"
     OCR_QUERY = "ocr"
     OCR_REPLY_QUERY = "ocr_reply"
-    DATA_PATH = "data"
+    DATA_PATH = os.path.join(_MODULE_PATH, "data")
 
     def __init__(self, encoding):
         self.client = MongoClient("localhost", 27017)
@@ -37,6 +41,7 @@ class TextExtractor:
         image_idx = self.fs.put(img)
         meta = {
             "imageID": image_idx,
+            "imagePath": path,
             "recognizedText": None,
             "correctedText": None
         }
@@ -140,11 +145,11 @@ class TextExtractor:
             print("All images are recognized. Time: {:.2f}".format(time() - t))
 
 
-def main():
+def main(input_args: List[str] = None):
     parser = argparse.ArgumentParser()
     subparser = parser.add_subparsers(dest='cmd')
     subparser.add_parser(
-        "load", 
+        "load",
         help="load images from ./data to db")
     subparser.add_parser(
         "process",
@@ -153,7 +158,10 @@ def main():
         "clear",
         help="clear db")
 
-    args = parser.parse_args()
+    if input_args is None:
+        args = parser.parse_args()
+    else:
+        args = parser.parse_args(input_args)
 
     config_file_path = os.path.join(
         os.path.dirname(os.path.abspath(__file__)),
